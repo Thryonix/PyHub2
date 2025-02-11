@@ -1,0 +1,26 @@
+.header {
+  display: flex;
+  align-items: center;
+  height: 64px;
+}
+
+.menu {
+  flex: 1;
+  min-width: 0;
+}
+
+.layout-content {
+  padding: 0 24px 24px;
+}
+
+.breadcrumb {
+  margin: 16px 0;
+}
+
+.content {
+  padding: 24px;
+  margin: 0;
+  min-height: 280px;
+  background: var(--colorBgContainer);
+  border-radius: var(--borderRadiusLG);
+}
