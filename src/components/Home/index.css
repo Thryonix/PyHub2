@@ -24,3 +24,32 @@
   background: var(--colorBgContainer);
   border-radius: var(--borderRadiusLG);
 }
+
+.AddProject{
+  height: 30px;
+  width: 30px;
+}
+
+.ManageProjects{
+  height: 30px;
+  width: 30px;
+}
+
+/* 添加过渡效果 */
+.panel-transition {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* 隐藏面板 */
+.panel-hidden {
+  opacity: 0;
+  transform: translateX(100%);
+  pointer-events: none; /* 防止隐藏的面板拦截点击事件 */
+}
+
+/* 显示面板 */
+.panel-visible {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
