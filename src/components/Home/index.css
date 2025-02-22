@@ -24,3 +24,13 @@
   background: var(--colorBgContainer);
   border-radius: var(--borderRadiusLG);
 }
+
+.AddProject{
+  height: 30px;
+  width: 30px;
+}
+
+.ManageProjects{
+  height: 30px;
+  width: 30px;
+}
