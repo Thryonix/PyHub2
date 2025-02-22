@@ -3,9 +3,12 @@ import {
   LaptopOutlined,
   NotificationOutlined,
   UserOutlined,
+  FolderOutlined,
+  EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme, Modal, Button, Card, Input, Form } from "antd";
+import { Breadcrumb, Layout, Menu, theme, Modal, Button, Card, Input, Form, Row, Col } from "antd";
 import "./index.css"; // 引入CSS文件
 
 const { Header, Content, Sider } = Layout;
@@ -39,6 +42,14 @@ const Home: React.FC = () => {
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isProjectSetupPanelVisible, setIsProjectSetupPanelVisible] = useState(false);
 
+  // 项目名称和路径状态
+  const [projectName, setProjectName] = useState("");
+  const [projectPath, setProjectPath] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+
+  // 项目列表状态
+  const [projects, setProjects] = useState<Array<{ name: string; path: string; description: string }>>([]);
+
   // 显示面板
   const showPanel = () => {
     setIsPanelVisible(true);
@@ -64,6 +75,46 @@ const Home: React.FC = () => {
   // 处理模板选择
   const handleTemplateSelect = () => {
     showProjectSetupPanel(); // 切换到项目设置面板
+  };
+
+  // 处理项目名称输入
+  const handleProjectNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setProjectName(name);
+    // 生成相对路径
+    setProjectPath(`app/${name}`);
+  };
+
+  // 处理项目描述输入
+  const handleProjectDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setProjectDescription(e.target.value);
+  };
+
+  // 处理创建项目
+  const handleCreateProject = () => {
+    // 创建新项目
+    const newProject = {
+      name: projectName,
+      path: projectPath,
+      description: projectDescription,
+    };
+
+    // 添加到项目列表
+    setProjects([...projects, newProject]);
+
+    // 重置表单
+    setProjectName("");
+    setProjectPath("");
+    setProjectDescription("");
+
+    // 关闭面板
+    hidePanel();
+  };
+
+  // 处理删除项目
+  const handleDeleteProject = (index: number) => {
+    const newProjects = projects.filter((_, i) => i !== index);
+    setProjects(newProjects);
   };
 
   return (
@@ -207,19 +258,31 @@ const Home: React.FC = () => {
                     <h2>项目设置</h2>
                     <Form layout="vertical">
                       <Form.Item label="项目名称">
-                        <Input placeholder="请输入项目名称" />
+                        <Input 
+                          placeholder="请输入项目名称" 
+                          value={projectName}
+                          onChange={handleProjectNameChange} // 监听项目名称输入
+                        />
                       </Form.Item>
                       <Form.Item label="项目路径">
-                        <Input placeholder="请输入项目路径" />
+                        <Input 
+                          placeholder="请输入项目路径" 
+                          value={projectPath}
+                          readOnly // 设置为只读
+                        />
                       </Form.Item>
                       <Form.Item label="项目描述">
-                        <Input.TextArea placeholder="请输入项目描述" />
+                        <Input.TextArea 
+                          placeholder="请输入项目描述" 
+                          value={projectDescription}
+                          onChange={handleProjectDescriptionChange} // 监听项目描述输入
+                        />
                       </Form.Item>
                     </Form>
                     <Button type="primary" onClick={hidePanel} style={{ marginRight: 8 }}>
                       关闭
                     </Button>
-                    <Button type="primary" onClick={hidePanel}>
+                    <Button type="primary" onClick={handleCreateProject}>
                       创建项目
                     </Button>
                   </div>
@@ -231,9 +294,34 @@ const Home: React.FC = () => {
               style={{
                 background: colorBgContainer,
                 borderRadius: borderRadiusLG,
+                padding: "24px",
               }}
             >
-              Content
+              {/* 显示项目列表 */}
+              <Row gutter={[16, 16]}>
+                {projects.map((project, index) => (
+                  <Col key={index} xs={24} sm={12} md={8} lg={6}>
+                    <Card
+                      title={
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <FolderOutlined style={{ marginRight: 8 }} />
+                          {project.name}
+                        </div>
+                      }
+                      actions={[
+                        <EditOutlined key="edit" />,
+                        <DeleteOutlined key="delete" onClick={() => handleDeleteProject(index)} />,
+                      ]}
+                      style={{ boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}
+                    >
+                      <div>
+                        <div><strong>路径:</strong> {project.path}</div>
+                        <div><strong>描述:</strong> {project.description}</div>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
             </Content>
           </Layout>
         </Layout>
