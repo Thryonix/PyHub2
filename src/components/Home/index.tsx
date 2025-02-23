@@ -15,7 +15,7 @@ const { Header, Content, Sider } = Layout;
 
 const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
   key,
-  label: `nav ${key}`,
+  label: key === "3" ? "扩展商城" : `nav ${key}`, // 将第三个导航项改为中文
 }));
 
 const items2: MenuProps["items"] = [
