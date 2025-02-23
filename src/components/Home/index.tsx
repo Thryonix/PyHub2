@@ -224,7 +224,7 @@ const Home: React.FC = () => {
                       <Card
                         hoverable
                         style={{ width: 180 }}
-                        cover={<img alt="example" src="https://via.placeholder.com/114514" />}
+                        cover={<div style={{height:40, width:100, }}><img alt="example" src="src\assets\PythonAppProject.svg" className="images-transparent"/></div>}
                         onClick={handleTemplateSelect}
                       >
                         <Card.Meta title="python应用模板" description="快速构建python应用" />
@@ -232,13 +232,13 @@ const Home: React.FC = () => {
                       <Card
                         hoverable
                         style={{ width: 180 }}
-                        cover={<img alt="example" src="https://via.placeholder.com/150" />}
+                        cover={<div style={{height:40, width:100, }}><img alt="example" src="src\assets\PythonGameProject.svg" className="images-transparent"/></div>}
                         onClick={handleTemplateSelect}
                       >
                         <Card.Meta title="python游戏模板" description="快速构建pygame项目" />
                       </Card>
                     </div>
-                    <Button type="primary" onClick={hidePanel}>
+                    <Button type="primary" onClick={hidePanel} >
                       关闭
                     </Button>
                   </div>
