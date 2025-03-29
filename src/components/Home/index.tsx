@@ -8,8 +8,9 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme, Modal, Button, Card, Input, Form, Row, Col } from "antd";
+import { Breadcrumb, Layout, Menu, theme, Modal, Button, Card, Input, Form, Row, Col, Flex, Progress } from "antd";
 import "./index.css"; // 引入CSS文件
+import { FlashIcon } from "@gandi-ide/gandi-ui/dist/Icon";
 
 const { Header, Content, Sider } = Layout;
 
@@ -49,6 +50,10 @@ const Home: React.FC = () => {
 
   // 项目列表状态
   const [projects, setProjects] = useState<Array<{ name: string; path: string; description: string }>>([]);
+
+  // 进度条状态
+  const [progressVisible, setProgressVisible] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
 
   // 显示面板
   const showPanel = () => {
@@ -106,6 +111,22 @@ const Home: React.FC = () => {
     setProjectName("");
     setProjectPath("");
     setProjectDescription("");
+
+    // 显示进度条
+    setProgressVisible(true);
+    setProgressPercent(0);
+
+    // 模拟进度
+    const progressInterval = setInterval(() => {
+      setProgressPercent((prevPercent) => {
+        if (prevPercent >= 100) {
+          clearInterval(progressInterval);
+          setProgressVisible(false); // 进度条到达100%后隐藏
+          return 100;
+        }
+        return prevPercent + 10;
+      });
+    }, 500);
 
     // 关闭面板
     hidePanel();
@@ -166,7 +187,7 @@ const Home: React.FC = () => {
                 onCancel={hidePanel}
                 footer={null}
                 closable={false}
-                maskClosable
+                maskClosable={true}
                 centered
                 width={600}
                 styles={{
@@ -288,6 +309,15 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </Modal>
+
+              {/* 进度条 */}
+              {progressVisible && (
+                <Progress
+                  percent={progressPercent}
+                  status={progressPercent < 100 ? "active" : "success"}
+                  style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", width: "80%" }}
+                />
+              )}
             </div>
             <Content
               className="content"
