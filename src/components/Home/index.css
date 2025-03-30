@@ -53,3 +53,18 @@
   transform: translateX(0);
   pointer-events: auto;
 }
+
+/* 设置图片透明度0.45 */
+.images-transparent {
+  opacity: 0.45;
+}
+
+/* 进度条面板动画 */
+.progress-panel {
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+.progress-panel.fade-out {
+  opacity: 0;
+}

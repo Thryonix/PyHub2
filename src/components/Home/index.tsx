@@ -3,16 +3,21 @@ import {
   LaptopOutlined,
   NotificationOutlined,
   UserOutlined,
+  FolderOutlined,
+  EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme, Modal, Button, Card, Input, Form } from "antd";
+import { Breadcrumb, Layout, Menu, theme, Modal, Button, Card, Input, Form, Row, Col, Flex, Progress } from "antd";
 import "./index.css"; // 引入CSS文件
+import { FlashIcon } from "@gandi-ide/gandi-ui/dist/Icon";
+import { useNavigate } from 'react-router-dom';
 
 const { Header, Content, Sider } = Layout;
 
 const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
   key,
-  label: `nav ${key}`,
+  label: key === "1" ? "家" : key === "3" ? "扩展商城" : `导航 ${key}`,
 }));
 
 const items2: MenuProps["items"] = [
@@ -30,6 +35,7 @@ const items2: MenuProps["items"] = [
 });
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -38,6 +44,19 @@ const Home: React.FC = () => {
   const [isPanelVisible, setIsPanelVisible] = useState(false);
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isProjectSetupPanelVisible, setIsProjectSetupPanelVisible] = useState(false);
+
+  // 项目名称和路径状态
+  const [projectName, setProjectName] = useState("");
+  const [projectPath, setProjectPath] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+
+  // 项目列表状态
+  const [projects, setProjects] = useState<Array<{ name: string; path: string; description: string }>>([]);
+
+  // 进度条状态
+  const [progressVisible, setProgressVisible] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   // 显示面板
   const showPanel = () => {
@@ -66,6 +85,76 @@ const Home: React.FC = () => {
     showProjectSetupPanel(); // 切换到项目设置面板
   };
 
+  // 处理项目名称输入
+  const handleProjectNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setProjectName(name);
+    // 生成相对路径
+    setProjectPath(`app/${name}`);
+  };
+
+  // 处理项目描述输入
+  const handleProjectDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setProjectDescription(e.target.value);
+  };
+
+  // 处理创建项目
+  const handleCreateProject = () => {
+    // 创建新项目
+    const newProject = {
+      name: projectName,
+      path: projectPath,
+      description: projectDescription,
+    };
+
+    // 添加到项目列表
+    setProjects([...projects, newProject]);
+
+    // 重置表单
+    setProjectName("");
+    setProjectPath("");
+    setProjectDescription("");
+
+    // 显示进度条
+    setProgressVisible(true);
+    setProgressPercent(0);
+    setIsFadingOut(false);
+
+    // 模拟进度
+    const progressInterval = setInterval(() => {
+      setProgressPercent((prevPercent) => {
+        if (prevPercent >= 100) {
+          clearInterval(progressInterval);
+          // 开始淡出动画
+          setIsFadingOut(true);
+          // 等待动画完成后隐藏
+          setTimeout(() => {
+            setProgressVisible(false);
+            setIsFadingOut(false);
+          }, 300);
+          return 100;
+        }
+        return prevPercent + 10;
+      });
+    }, 500);
+
+    // 关闭面板
+    hidePanel();
+  };
+
+  // 处理删除项目
+  const handleDeleteProject = (index: number) => {
+    const newProjects = projects.filter((_, i) => i !== index);
+    setProjects(newProjects);
+  };
+
+  // 处理菜单点击
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === "3") {
+      navigate('/extension-store');
+    }
+  };
+
   return (
     <>
       <Header className="header">
@@ -73,9 +162,10 @@ const Home: React.FC = () => {
         <Menu
           theme="dark"
           mode="horizontal"
-          defaultSelectedKeys={["2"]}
+          defaultSelectedKeys={["1"]}
           items={items1}
           className="menu"
+          onClick={handleMenuClick}
         />
       </Header>
       <div>
@@ -115,7 +205,7 @@ const Home: React.FC = () => {
                 onCancel={hidePanel}
                 footer={null}
                 closable={false}
-                maskClosable
+                maskClosable={true}
                 centered
                 width={600}
                 styles={{
@@ -173,7 +263,7 @@ const Home: React.FC = () => {
                       <Card
                         hoverable
                         style={{ width: 180 }}
-                        cover={<img alt="example" src="https://via.placeholder.com/114514" />}
+                        cover={<div style={{height:40, width:100, }}><img alt="example" src="src\assets\PythonAppProject.svg" className="images-transparent"/></div>}
                         onClick={handleTemplateSelect}
                       >
                         <Card.Meta title="python应用模板" description="快速构建python应用" />
@@ -181,13 +271,13 @@ const Home: React.FC = () => {
                       <Card
                         hoverable
                         style={{ width: 180 }}
-                        cover={<img alt="example" src="https://via.placeholder.com/150" />}
+                        cover={<div style={{height:40, width:100, }}><img alt="example" src="src\assets\PythonGameProject.svg" className="images-transparent"/></div>}
                         onClick={handleTemplateSelect}
                       >
                         <Card.Meta title="python游戏模板" description="快速构建pygame项目" />
                       </Card>
                     </div>
-                    <Button type="primary" onClick={hidePanel}>
+                    <Button type="primary" onClick={hidePanel} >
                       关闭
                     </Button>
                   </div>
@@ -207,33 +297,107 @@ const Home: React.FC = () => {
                     <h2>项目设置</h2>
                     <Form layout="vertical">
                       <Form.Item label="项目名称">
-                        <Input placeholder="请输入项目名称" />
+                        <Input 
+                          placeholder="请输入项目名称" 
+                          value={projectName}
+                          onChange={handleProjectNameChange} // 监听项目名称输入
+                        />
                       </Form.Item>
                       <Form.Item label="项目路径">
-                        <Input placeholder="请输入项目路径" />
+                        <Input 
+                          placeholder="请输入项目路径" 
+                          value={projectPath}
+                          readOnly // 设置为只读
+                        />
                       </Form.Item>
                       <Form.Item label="项目描述">
-                        <Input.TextArea placeholder="请输入项目描述" />
+                        <Input.TextArea 
+                          placeholder="请输入项目描述" 
+                          value={projectDescription}
+                          onChange={handleProjectDescriptionChange} // 监听项目描述输入
+                        />
                       </Form.Item>
                     </Form>
                     <Button type="primary" onClick={hidePanel} style={{ marginRight: 8 }}>
                       关闭
                     </Button>
-                    <Button type="primary" onClick={hidePanel}>
+                    <Button type="primary" onClick={handleCreateProject}>
                       创建项目
                     </Button>
                   </div>
                 </div>
               </Modal>
+
+              {/* 进度条 */}
+              {progressVisible && (
+                <div className={`progress-panel ${isFadingOut ? 'fade-out' : ''}`} style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  zIndex: 1000
+                }}>
+                  <div style={{
+                    backgroundColor: "white",
+                    padding: "24px",
+                    borderRadius: "8px",
+                    width: "400px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)"
+                  }}>
+                    <Progress
+                      percent={progressPercent}
+                      status={progressPercent < 100 ? "active" : "success"}
+                      style={{ width: "100%" }}
+                    />
+                    <div style={{ 
+                      textAlign: "center", 
+                      marginTop: "16px",
+                      color: "#666"
+                    }}>
+                      {progressPercent < 100 ? "正在创建项目..." : "项目创建完成"}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <Content
               className="content"
               style={{
                 background: colorBgContainer,
                 borderRadius: borderRadiusLG,
+                padding: "24px",
               }}
             >
-              Content
+              {/* 显示项目列表 */}
+              <Row gutter={[16, 16]}>
+                {projects.map((project, index) => (
+                  <Col key={index} xs={24} sm={12} md={8} lg={6}>
+                    <Card
+                      title={
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <FolderOutlined style={{ marginRight: 8 }} />
+                          {project.name}
+                        </div>
+                      }
+                      actions={[
+                        <EditOutlined key="edit" />,
+                        <DeleteOutlined key="delete" onClick={() => handleDeleteProject(index)} />,
+                      ]}
+                      style={{ boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}
+                    >
+                      <div>
+                        <div><strong>路径:</strong> {project.path}</div>
+                        <div><strong>描述:</strong> {project.description}</div>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
             </Content>
           </Layout>
         </Layout>
