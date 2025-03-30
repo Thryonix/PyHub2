@@ -11,12 +11,13 @@ import type { MenuProps } from "antd";
 import { Breadcrumb, Layout, Menu, theme, Modal, Button, Card, Input, Form, Row, Col, Flex, Progress } from "antd";
 import "./index.css"; // 引入CSS文件
 import { FlashIcon } from "@gandi-ide/gandi-ui/dist/Icon";
+import { useNavigate } from 'react-router-dom';
 
 const { Header, Content, Sider } = Layout;
 
 const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
   key,
-  label: key === "3" ? "扩展商城" : `nav ${key}`, // 将第三个导航项改为中文
+  label: key === "1" ? "家" : key === "3" ? "扩展商城" : `导航 ${key}`,
 }));
 
 const items2: MenuProps["items"] = [
@@ -34,6 +35,7 @@ const items2: MenuProps["items"] = [
 });
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -54,6 +56,7 @@ const Home: React.FC = () => {
   // 进度条状态
   const [progressVisible, setProgressVisible] = useState(false);
   const [progressPercent, setProgressPercent] = useState(0);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   // 显示面板
   const showPanel = () => {
@@ -115,13 +118,20 @@ const Home: React.FC = () => {
     // 显示进度条
     setProgressVisible(true);
     setProgressPercent(0);
+    setIsFadingOut(false);
 
     // 模拟进度
     const progressInterval = setInterval(() => {
       setProgressPercent((prevPercent) => {
         if (prevPercent >= 100) {
           clearInterval(progressInterval);
-          setProgressVisible(false); // 进度条到达100%后隐藏
+          // 开始淡出动画
+          setIsFadingOut(true);
+          // 等待动画完成后隐藏
+          setTimeout(() => {
+            setProgressVisible(false);
+            setIsFadingOut(false);
+          }, 300);
           return 100;
         }
         return prevPercent + 10;
@@ -138,6 +148,13 @@ const Home: React.FC = () => {
     setProjects(newProjects);
   };
 
+  // 处理菜单点击
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === "3") {
+      navigate('/extension-store');
+    }
+  };
+
   return (
     <>
       <Header className="header">
@@ -145,9 +162,10 @@ const Home: React.FC = () => {
         <Menu
           theme="dark"
           mode="horizontal"
-          defaultSelectedKeys={["2"]}
+          defaultSelectedKeys={["1"]}
           items={items1}
           className="menu"
+          onClick={handleMenuClick}
         />
       </Header>
       <div>
@@ -312,11 +330,39 @@ const Home: React.FC = () => {
 
               {/* 进度条 */}
               {progressVisible && (
-                <Progress
-                  percent={progressPercent}
-                  status={progressPercent < 100 ? "active" : "success"}
-                  style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", width: "80%" }}
-                />
+                <div className={`progress-panel ${isFadingOut ? 'fade-out' : ''}`} style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  zIndex: 1000
+                }}>
+                  <div style={{
+                    backgroundColor: "white",
+                    padding: "24px",
+                    borderRadius: "8px",
+                    width: "400px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)"
+                  }}>
+                    <Progress
+                      percent={progressPercent}
+                      status={progressPercent < 100 ? "active" : "success"}
+                      style={{ width: "100%" }}
+                    />
+                    <div style={{ 
+                      textAlign: "center", 
+                      marginTop: "16px",
+                      color: "#666"
+                    }}>
+                      {progressPercent < 100 ? "正在创建项目..." : "项目创建完成"}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
             <Content
